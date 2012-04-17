@@ -17,22 +17,13 @@ module Cielo
     BASE_URL = "qasecommerce.cielo.com.br"
     WS_PATH = "/servicos/ecommwsec.do"
   end
-  
-  @@environment = :test
-  mattr_accessor :environment
-  @@numero_afiliacao = "1001734898"
+
+  @@numero_afiliacao = "1006993069"
   mattr_accessor :numero_afiliacao
-  @@chave_acesso="e84827130b9837473681c2787007da5914d6359947015a5cdb2b8843db0fa832"
+  @@chave_acesso="25fbb99741c739dd84d7b06ec78c9bac718838630f30b112d033ce2e621b34f3"
   mattr_accessor :chave_acesso
   @@return_path = "http://localhost:3000"
   mattr_accessor :return_path
-  @@bandeiras = %w(visa mastercard elo diners discovery)
-  mattr_accessor :bandeiras
-  @@produtos = {:credito_vista => 1, :credito_parcelado_loja => 2, :credito_parcelado_adm => 3, :debito => "A"}
-  mattr_accessor :produtos
-  
-  
-  BANDEIRAS = %w(visa mastercard elo diners discovery)
 
   def self.setup
     yield self

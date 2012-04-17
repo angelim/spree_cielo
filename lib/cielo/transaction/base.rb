@@ -6,18 +6,6 @@ module Cielo
       BANDEIRAS = %w(visa mastercard elo diners discovery)
       INDICADORES = [0, 1, 2, 9]
       IDIOMAS = %w(PT EN ES)
-      
-      def dados_portador_attributes
-        %w(numero validade indicador codigo_seguranca nome_portador)
-      end
-      
-      def dados_pedido_attributes
-        %w(numero valor moeda data_hora descricao idioma)
-      end
-      
-      def forma_pagamento_attributes
-        %w(bandeira produto parcelas)
-      end
     
       attribute :dados_ec_numero, type: String, default: lambda{ Cielo.numero_afiliacao }
       attribute :dados_ec_chave, type: String, default: lambda{ Cielo.chave_acesso }
@@ -54,36 +42,35 @@ module Cielo
   
       attribute :autorizar, type: Integer, default: 3
       attribute :capturar, type: String, default: "false"
+      attribute :cielo_environment, type: String, default: "Test"
+      validates :cielo_environment, :inclusion => {:in => %w(Test Production)}
       validates :capturar, :inclusion => {:in => %w(true false)}
       validates :autorizar, :presence => true    
       
-      attr_accessor :request
       attr_accessor :response
+      attr_accessor :parsed_response
       attr_accessor :message
+      attr_accessor :cielo_environment
       
       def initialize
         super
-        @connection = Cielo::Connection.new
+        @connection = Cielo::Connection.new(cielo_environment)
       end
 
       def indicador_presente?
         dados_portador_indicador == 1
       end
       
-      def format_node_name(value)
-        value.gsub("__", "").gsub("_", "-")
+      def format_name(name)
+        name.gsub("_", "-")
+      end
+
+      def attributes_hash(attr_names)
+        attr_names.inject({}){|acc, name| acc[format_name(name)] = send(name); acc }
       end
       
-      def get_value(attribute)
-        send(attribute)
-      end
-      
-      def attributes_hash(attr_names, root = nil)
-        attr_names.inject({}){|acc, name| acc[format_node_name(name)] = get_value("#{root}#{name}"); acc }
-      end
-      
-      def save
-        return self if !valid?
+      def save!
+        return false if !valid?
         self.message = xml_builder("requisicao-transacao") do |xml|
           if enviar_portador?
             xml.tag!("dados-portador") do
@@ -114,23 +101,24 @@ module Cielo
             xml.tag!(name, value) if value.present?
           end
         end.target!
+        make_request!
       end
     
       def verify!(cielo_tid)
         return nil unless cielo_tid
         self.message = xml_builder("requisicao-consulta", :before) do |xml|
           xml.tid "#{cielo_tid}"
-        end
+        end.target!
       
-        make_request! message
+        make_request!
       end
     
       def catch!(cielo_tid)
         return nil unless cielo_tid
         self.message = xml_builder("requisicao-captura", :before) do |xml|
           xml.tid "#{cielo_tid}"
-        end
-        make_request! message
+        end.target!
+        make_request!
       end
 
       def xml_builder(group_name, target=:after, &block)
@@ -148,20 +136,19 @@ module Cielo
       end
     
       def make_request!
-        self.request, self.response = nil, nil
+        self.response, self.parsed_response = nil, nil
         params = { :mensagem => message }
       
-        self.request = @connection.request! params
-        self.response = parse_response(request)
+        self.response = @connection.request! params
       end
     
-      def parse_response(response)
+      def parse_response
         case response
         when Net::HTTPSuccess
           document = REXML::Document.new(response.body)
-          parse_elements(document.elements)
+          self.parsed_response = parse_elements(document.elements)
         else
-          {:erro => { :codigo => "000", :mensagem => "Impossível contactar o servidor"}}
+          self.errors[:base] = {:erro => { :codigo => "000", :mensagem => "Impossível contactar o servidor"}}
         end
       end
       

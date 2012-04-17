@@ -1,0 +1,9 @@
+<div class="span5 form-actions" data-hook="buttons">
+<%= simple_form_for @order, :url => update_checkout_path(@order.state), :html => { :id => "checkout_form_#{@order.state}" } do |form| %>
+	<% if @order.payment_method.is_a? Spree::PaymentMethod::PagSeguroMethod %>
+		<%= link_to t("check_out_with_pag_seguro"), PagSeguro::Payment.checkout_payment_url(@order.payment.source.code), :class => 'continue btn btn-primary' %>
+	<% else %>
+		<%= submit_tag t(:place_order), :class => 'continue btn btn-primary' %>
+	<% end %>
+<% end %>
+</div>
