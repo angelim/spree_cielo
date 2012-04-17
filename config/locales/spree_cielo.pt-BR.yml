@@ -1,0 +1,66 @@
+pt-BR:
+  time:
+    formats:
+      cielo: "%Y-%m-%dT%H:%M:%S"
+  date:
+    formats:
+      cielo: "%Y%m"
+  activemodel:
+    attributes:
+      cielo/transaction:
+        dados_ec_numero: "Número de afiliação da loja com a Cielo."
+        dados_ec_chave: "Chave de acesso da loja atribuida pela Cielo."
+        dados_portador_numero: "Número do cartão."
+        dados_portador_validade: "Validade do cartão."
+        dados_portador_indicador: "Indicador do código de segurança."
+        dados_portador_codigo_seguranca: "Código de segurança."
+        dados_portador_nome_portador: "Nome impresso no cartão."
+        dados_pedido_numero: "Número do pedido da loja."
+        dados_pedido_valor: "Valor do pedido."
+        dados_pedido_moeda: "Código numérico da moeda."
+        dados_pedido_data_hora: "Data e hora do pedido."
+        dados_pedido_descricao: "Descrição do pedido."
+        dados_pedido_idioma: "Idioma da loja."
+        forma_pagamento_bandeira: "Bandeira do cartão."
+        forma_pagamento_produto: "Código do produto."
+        forma_pagamento_parcelas: "Número de parcelas."
+        url_retorno: "URL da página de retorno."
+        autorizar: "Indicador de autorização automática."
+        campo_livre: "Campo livre."
+        bin: "Seis primeiros dígitos do cartão."
+    errors:
+      messages:
+        presence: "não pode ficar em branco"
+        validations: Há erros de validação
+        inclusion: "não está incluído na lista"
+        exclusion: "não está disponível"
+        invalid: "não é válido"
+        confirmation: "não está de acordo com a confirmação"
+        accepted: "deve ser aceito"
+        empty: "não pode ficar vazio"
+        blank: "não pode ficar em branco"
+        too_long: "é muito longo (máximo: %{count} caracteres)"
+        too_short: "é muito curto (mínimo: %{count} caracteres)"
+        wrong_length: "não possui o tamanho esperado (%{count} caracteres)"
+        taken: "já está em uso"
+        not_a_number: "deve ser um número"
+        greater_than: "deve ser maior do que %{count}"
+        greater_than_or_equal_to: "deve ser maior ou igual a %{count}"
+        equal_to: "deve ser igual a %{count}"
+        less_than: "deve ser menor do que %{count}"
+        less_than_or_equal_to: "deve ser menor ou igual a %{count}"
+        odd: "deve ser ímpar"
+        even: "deve ser par"
+        email_format: "deve ser um endereço válido"
+        invalid_type: Tipo Inválido
+        not_found: "não encontrado"
+        already_confirmed: "já foi confirmado"
+        not_locked: "não foi bloqueado"
+        not_saved:
+          one: "Não foi possível gravar %{resource}: 1 erro"
+          other: "Não foi possível gravar %{resource}: %{count} erros."
+      models:
+        cielo/transaction:
+          attributes:
+            dados_ec_numero:
+              invalid: somente números
