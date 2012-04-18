@@ -6,13 +6,38 @@ module Cielo
       BANDEIRAS = %w(visa mastercard elo diners discovery)
       INDICADORES = [0, 1, 2, 9]
       IDIOMAS = %w(PT EN ES)
-    
+      STATUSES = {
+        :created => 0,
+        :in_progress => 1,
+        :authenticated => 2,
+        :not_authenticated => 3,
+        :authorized_pending_capture => 4,
+        :not_authorized => 5,
+        :captured => 6, 
+        :not_captured => 8,
+        :cancelled => 9,
+        :authentication_in_progress => 10
+        }
+        
+      # Created query methods for all transaction states
+      # @example Querying for created status
+      #   t = Cielo::Transaction::Base.new(:status => 0)
+      #   t.created? #=> true
+      #   t.inprogress? #=> false
+      # @return [true, false]
+      STATUSES.keys.each do |name|
+        define_method "#{name}?" do
+          status == STATUSES[name.to_sym]
+        end
+      end
+      # Dados EC
       attribute :dados_ec_numero, type: String, default: lambda{ Cielo.numero_afiliacao }
       attribute :dados_ec_chave, type: String, default: lambda{ Cielo.chave_acesso }
       validates :dados_ec_numero, :format => {:with => /\d./}, :length => {:minimum => 1, :maximum => 20}, :presence => true
       validates :dados_ec_chave, :length => {:minimum => 1, :maximum => 100}, :presence => true
 
-      attribute :dados_portador_numero, type: Integer
+      # Dados Portador
+      attribute :dados_portador_numero, type: String
       attribute :dados_portador_validade, type: Date
       attribute :dados_portador_indicador, type: Integer
       attribute :dados_portador_codigo_seguranca, type: Integer
@@ -23,6 +48,7 @@ module Cielo
       validates :dados_portador_codigo_seguranca, :presence => true, :if => :indicador_presente?, :if => :enviar_portador?
       validates :dados_portador_nome_portador, :length => { :maximum => 20 }, :if => :enviar_portador?
         
+      # Dados Pedido
       attribute :dados_pedido_numero, type: String
       attribute :dados_pedido_valor, type: Float
       attribute :dados_pedido_moeda, type: Integer, default: 986
@@ -34,26 +60,33 @@ module Cielo
       validates :dados_pedido_descricao, :length => { :maximum => 1024 }
       validates :dados_pedido_idioma, :inclusion => {:in => IDIOMAS, :allow_blank => true}
     
+      # Forma Pagamento
       attribute :forma_pagamento_bandeira, type: String, default: BANDEIRAS.first
-      attribute :forma_pagamento_produto, type: Integer, default: 1
       attribute :forma_pagamento_parcelas, type: Integer, default: 1
       validates :forma_pagamento_bandeira, :inclusion => {:in => BANDEIRAS}, :presence => true
       validates :forma_pagamento_parcelas, :presence => true
-  
+      
+      # Other request parameters
+      attribute :parcelado_por, type: String, default: lambda{ Cielo.parcelado_por }
       attribute :autorizar, type: Integer, default: 3
       attribute :capturar, type: String, default: "false"
       attribute :cielo_environment, type: String, default: "Test"
+      validates :status, :inclusion => {:in => STATUSES.values, :allow_blank => true}
       validates :cielo_environment, :inclusion => {:in => %w(Test Production)}
       validates :capturar, :inclusion => {:in => %w(true false)}
-      validates :autorizar, :presence => true    
+      validates :autorizar, :presence => true   
+      
+      # Response parameters
+      attribute :status, type: Integer
+      attribute :tid, type: String 
+      attribute :authentication_url, type: String 
       
       attr_accessor :response
-      attr_accessor :parsed_response
+      attr_accessor :body
       attr_accessor :message
-      attr_accessor :cielo_environment
       
-      def initialize
-        super
+      def initialize(args = {})
+        super(args)
         @connection = Cielo::Connection.new(cielo_environment)
       end
 
@@ -67,6 +100,14 @@ module Cielo
 
       def attributes_hash(attr_names)
         attr_names.inject({}){|acc, name| acc[format_name(name)] = send(name); acc }
+      end
+      
+      def forma_pagamento_produto
+        if forma_pagamento_parcelas > 1
+          parcelado_por == "loja" ? 2 : 3
+        else
+          1
+        end
       end
       
       def save!
@@ -104,21 +145,47 @@ module Cielo
         make_request!
       end
     
-      def verify!(cielo_tid)
-        return nil unless cielo_tid
+      def verify!
+        unless tid
+          self.errors[:tid] = :blank
+          return false
+        end
         self.message = xml_builder("requisicao-consulta", :before) do |xml|
-          xml.tid "#{cielo_tid}"
+          xml.tid tid
+        end.target!
+      
+        make_request!
+      end
+      
+      def void!
+        unless tid
+          self.errors[:tid] = :blank
+          return false
+        end
+        self.message = xml_builder("requisicao-cancelamento", :before) do |xml|
+          xml.tid tid
         end.target!
       
         make_request!
       end
     
-      def catch!(cielo_tid)
-        return nil unless cielo_tid
+      def capture!
+        unless tid
+          self.errors[:tid] = :blank
+          return false
+        end
         self.message = xml_builder("requisicao-captura", :before) do |xml|
-          xml.tid "#{cielo_tid}"
+          xml.tid tid
         end.target!
         make_request!
+      end
+      
+      def persist
+        return false if body[:transacao].blank? || errors[:response].present?
+        self.tid = body[:transacao][:tid]
+        self.authentication_url = body[:transacao][:"url-autenticacao"]
+        self.status = body[:transacao][:status]
+        return self
       end
 
       def xml_builder(group_name, target=:after, &block)
@@ -136,20 +203,26 @@ module Cielo
       end
     
       def make_request!
-        self.response, self.parsed_response = nil, nil
+        self.response, self.body = nil, nil
         params = { :mensagem => message }
       
         self.response = @connection.request! params
+        parse_response
       end
     
       def parse_response
         case response
         when Net::HTTPSuccess
           document = REXML::Document.new(response.body)
-          self.parsed_response = parse_elements(document.elements)
+          self.body = parse_elements(document.elements)
+          if body[:erro].present?
+            self.errors[:response] = body[:erro].values   
+          end
         else
-          self.errors[:base] = {:erro => { :codigo => "000", :mensagem => "Impossível contactar o servidor"}}
+          self.body = {:codigo => "000", :mensagem => "Impossível contactar o servidor"}
+          self.errors[:response] = "Impossível contactar o servidor"
         end
+        persist
       end
       
       def parse_elements(elements)

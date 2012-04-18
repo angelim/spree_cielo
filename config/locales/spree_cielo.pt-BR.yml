@@ -1,4 +1,6 @@
 pt-BR:
+  order_not_found: Pedido não encontrado
+  payment_not_identified: Pagamento ainda não identificado
   time:
     formats:
       cielo: "%Y-%m-%dT%H:%M:%S"
@@ -7,27 +9,27 @@ pt-BR:
       cielo: "%Y%m"
   activemodel:
     attributes:
-      cielo/transaction:
-        dados_ec_numero: "Número de afiliação da loja com a Cielo."
-        dados_ec_chave: "Chave de acesso da loja atribuida pela Cielo."
-        dados_portador_numero: "Número do cartão."
-        dados_portador_validade: "Validade do cartão."
-        dados_portador_indicador: "Indicador do código de segurança."
-        dados_portador_codigo_seguranca: "Código de segurança."
-        dados_portador_nome_portador: "Nome impresso no cartão."
-        dados_pedido_numero: "Número do pedido da loja."
-        dados_pedido_valor: "Valor do pedido."
-        dados_pedido_moeda: "Código numérico da moeda."
-        dados_pedido_data_hora: "Data e hora do pedido."
-        dados_pedido_descricao: "Descrição do pedido."
-        dados_pedido_idioma: "Idioma da loja."
-        forma_pagamento_bandeira: "Bandeira do cartão."
-        forma_pagamento_produto: "Código do produto."
-        forma_pagamento_parcelas: "Número de parcelas."
-        url_retorno: "URL da página de retorno."
-        autorizar: "Indicador de autorização automática."
-        campo_livre: "Campo livre."
-        bin: "Seis primeiros dígitos do cartão."
+      cielo/transaction/base:
+        dados_ec_numero: "Número de afiliação da loja com a Cielo"
+        dados_ec_chave: "Chave de acesso da loja atribuida pela Cielo"
+        dados_portador_numero: "Número do cartão"
+        dados_portador_validade: "Validade do cartão"
+        dados_portador_indicador: "Indicador do código de segurança"
+        dados_portador_codigo_seguranca: "Código de segurança"
+        dados_portador_nome_portador: "Nome impresso no cartão"
+        dados_pedido_numero: "Número do pedido da loja"
+        dados_pedido_valor: "Valor do pedido"
+        dados_pedido_moeda: "Código numérico da moeda"
+        dados_pedido_data_hora: "Data e hora do pedido"
+        dados_pedido_descricao: "Descrição do pedido"
+        dados_pedido_idioma: "Idioma da loja"
+        forma_pagamento_bandeira: "Bandeira do cartão"
+        forma_pagamento_produto: "Código do produto"
+        forma_pagamento_parcelas: "Número de parcelas"
+        url_retorno: "URL da página de retorno"
+        autorizar: "Indicador de autorização automática"
+        campo_livre: "Campo livre"
+        bin: "Seis primeiros dígitos do cartão"
     errors:
       messages:
         presence: "não pode ficar em branco"

@@ -24,9 +24,17 @@ module Cielo
   mattr_accessor :chave_acesso
   @@return_path = "http://localhost:3000"
   mattr_accessor :return_path
+  @@parcelado_por = "loja"
+  mattr_accessor :parcelado_por
 
   def self.setup
     yield self
   end
   class MissingArgumentError < StandardError; end
+  class PaymentError < StandardError
+    def initialize(errors)
+      @model_errors = errors
+    end
+    attr_reader :model_errors
+  end
 end

@@ -16,7 +16,10 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'spree_core', '~> 1.0.0.rc1'
   s.add_dependency 'activesupport'
-  s.add_dependency('active_attr')
-  s.add_dependency('builder')
+  s.add_dependency 'active_attr'
+  s.add_dependency 'builder'
+  s.add_dependency 'delayed_job'
+  s.add_dependency 'delayed_job_active_record'
+  s.add_dependency 'psych', '1.3.2'
 end
 

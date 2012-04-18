@@ -3,14 +3,15 @@ module Spree
     
     attr_accessor :order_id
     has_one :payment, :as => :source
+    delegate :order, :to => :payment
     
     def process!(payment)
-      order = payment.order
-      
-      redirect_url = "#{Spree::Config[:site_url]}/orders/#{order.number}"
+      redirect_url = "#{Spree::Config[:site_url]}/cielo/orders/#{order.number}/payments/#{payment.id}/return"
 
       cielo_regular_transaction = ::Cielo::Transaction::Regular.new(
-        cielo_environment: payment.payment_method.cielo_environment
+        dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
+        dados_ec_chave: payment.payment_method.preferred_chave_acesso,
+        cielo_environment: payment.payment_method.preferred_cielo_environment,
         url_retorno: redirect_url,
         dados_pedido_numero: order.number,
         dados_pedido_valor: order.total,
@@ -19,24 +20,36 @@ module Spree
         forma_pagamento_parcelas: instalments,
       )
       if cielo_regular_transaction.save!
-        response = cielo_regular_transaction.response
-        self.tid = response[:transacao][:tid]
-        self.authentication_url = response[:"url-autenticacao"]
-        record_log payment, response
-        if response
-        self.save
-      elsif cielo_regular_transaction.response[:errors].present?
-        self.errors[:base] = 
+        self.tid = cielo_regular_transaction.tid
+        self.authentication_url = cielo_regular_transaction.authentication_url
+        self.status = cielo_regular_transaction.status
+        record_log payment, cielo_regular_transaction.body
+        if cielo_regular_transaction.errors.empty?
+          self.save
+        else
+          raise Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
+        end
+      else
+        record_log payment, cielo_regular_transaction.errors
+        raise Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
       end
     end
     
     def actions
-      %w{capture void credit}
+      %w{capture void credit verify retry_capture}
+    end
+    
+    def retry_capture(payment)
+      
     end
 
     # Indicates whether its possible to capture the payment
     def can_capture?(payment)
       payment.state == 'pending'
+    end
+    
+    def can_verify?(payment)
+      tid.present?
     end
 
     # Indicates whether its possible to void the payment.
@@ -57,15 +70,29 @@ module Spree
     end
 
     def capture(payment)
-      payment.update_attribute(:state, 'pending') if payment.state == 'checkout'
-      payment.complete
-      true
+      return nil if tid.blank?
+      t = Cielo::Transaction::Base.new(:tid => tid)
+      t.capture!
+      record_log payment, t.body
+      if t.captured?
+        payment.complete
+        true
+      else
+        false
+      end
     end
 
     def void(payment)
-      payment.update_attribute(:state, 'pending') if payment.state == 'checkout'
-      payment.void
-      true
+      return nil if tid.blank?
+      t = Cielo::Transaction::Base.new(:tid => tid)
+      t.void!
+      record_log payment, t.body
+      if t.cancelled?
+        payment.void
+        true
+      else
+        false
+      end
     end
   end
 end

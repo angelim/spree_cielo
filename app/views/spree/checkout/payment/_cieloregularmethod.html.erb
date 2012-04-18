@@ -1,0 +1,12 @@
+<%= hidden_field "payment_source[#{payment_method.id}]", 'order_id', value: @order.id %>
+<% param_prefix = "payment_source[#{payment_method.id}]" %>
+<div class="span3">
+	<%= label_tag "Bandeira *" %>
+	<%= select_tag "#{param_prefix}[cc_type]", options_for_select(Cielo::Transaction::Base::BANDEIRAS.map{|b|[b.capitalize, b]}) %>
+	<% (1..3).each do |instalment| %>
+		<p>
+			<%= radio_button_tag "#{param_prefix}[instalments]", instalment, instalment==1 %>
+			<%= "#{instalment}x de #{number_to_currency(@order.total/instalment.to_f)}" %>
+		</p>
+	<% end %>
+</div>
