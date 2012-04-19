@@ -5,13 +5,13 @@ module Spree
     preference :maximo_parcelas, :integer, :default => 3
     preference :cielo_environment, :string, :default => "Test"
     
-    def payment_profiles_supported?
-      true
-    end
-    
-    def process_before_confirm?
-      true
-    end
+    # def payment_profiles_supported?
+    #   true
+    # end
+    # 
+    # def process_before_confirm?
+    #   true
+    # end
     
     def payment_source_class
       CieloRegularPayment

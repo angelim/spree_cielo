@@ -68,6 +68,24 @@ module Spree
     def record_log(payment, response)
       payment.log_entries.create(:details => response.to_yaml)
     end
+    
+    def verify(payment)
+      return nil if tid.blank?
+      t = Cielo::Transaction::Base.new(:tid => tid)
+      t.verify!
+      record_log payment, t.body
+      case Cielo::Transaction::Base::STATUSES.key(t.status)
+        when :captured
+          payment.complete
+        when :in_progress, :authentication_in_progress
+          return
+        when :authenticated
+          payment.started_processing
+          capture(payment)
+        else
+          payment.started_processing; payment.failure
+      end
+    end
 
     def capture(payment)
       return nil if tid.blank?

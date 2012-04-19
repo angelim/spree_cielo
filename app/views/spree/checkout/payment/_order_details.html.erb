@@ -1,7 +1,0 @@
-<% if @order.payment_method.instance_of? Spree::PaymentMethod::CieloRegularMethod %>
-  <% if @order.payment.completed? %>
-    Seu pagamento foi aprovado 
-  <% else %>
-		Aguardando confirmação de pagamento.
-  <% end %>
-<% end %>
