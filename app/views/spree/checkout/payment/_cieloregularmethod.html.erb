@@ -10,3 +10,12 @@
 		</p>
 	<% end %>
 </div>
+<div class="span5">
+	<ul class="thumbnails cards">
+		<li class="span1"><%= link_to image_tag("payment/visa.png", :size => "51x30"), "#", :data => {:card => "Visa"}, :class => "thumbnail" %></li>
+		<li class="span1"><%= link_to image_tag("payment/mastercard.png", :size => "43x30"), "#", :data => {:card => "Mastercard"}, :class => "thumbnail" %></li>
+		<li class="span1"><%= link_to image_tag("payment/diners.png", :size => "41x30"), "#", :data => {:card => "Diners"}, :class => "thumbnail" %></li>
+		<li class="span1"><%= link_to image_tag("payment/elo.png", :size => "30x30"), "#", :data => {:card => "Elo"}, :class => "thumbnail" %></li>
+		<li class="span1"><%= link_to image_tag("payment/discover.png", :size => "48x30"), "#", :data => {:card => "Discover"}, :class => "thumbnail" %></li>
+	</ul>
+</div>
