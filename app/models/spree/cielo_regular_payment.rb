@@ -6,7 +6,7 @@ module Spree
     delegate :order, :to => :payment
     
     def process!(payment)
-      redirect_url = "#{Spree::Config[:site_url]}/cielo/orders/#{order.number}/payments/#{payment.id}/return"
+      redirect_url = "#{Spree::Config[:site_url]}/cielo/orders/#{order.number}/payments/#{payment.id}/verify"
 
       cielo_regular_transaction = ::Cielo::Transaction::Regular.new(
         dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
@@ -39,10 +39,6 @@ module Spree
       %w{capture void credit verify retry_capture}
     end
     
-    def retry_capture(payment)
-      
-    end
-
     # Indicates whether its possible to capture the payment
     def can_capture?(payment)
       payment.state == 'pending'
@@ -70,16 +66,19 @@ module Spree
     end
     
     def verify(payment)
-      return nil if tid.blank?
+      if tid.blank?
+        payment.started_processing; payment.failure
+        return
+      end
       t = Cielo::Transaction::Base.new(:tid => tid)
       t.verify!
       record_log payment, t.body
       case Cielo::Transaction::Base::STATUSES.key(t.status)
         when :captured
           payment.complete
-        when :in_progress, :authentication_in_progress
+        when :in_progress
           return
-        when :authenticated
+        when :authorized_pending_capture
           payment.started_processing
           capture(payment)
         else
@@ -88,15 +87,15 @@ module Spree
     end
 
     def capture(payment)
-      return nil if tid.blank?
+      if tid.blank?
+        payment.started_processing; payment.failure
+        return
+      end
       t = Cielo::Transaction::Base.new(:tid => tid)
       t.capture!
       record_log payment, t.body
       if t.captured?
         payment.complete
-        true
-      else
-        false
       end
     end
 
