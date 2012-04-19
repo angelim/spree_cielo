@@ -1,6 +1,0 @@
-<fieldset>
-	Pagseguro somente pode ser usado para o total da ordem
-	<% if @order.payment_method.instance_of? Spree::PaymentMethod::PagSeguroMethod  %>
-		<%= link_to PagSeguro::Payment.checkout_payment_url(@order.payment.source.code) %>
-	<% end %>
-</fieldset>

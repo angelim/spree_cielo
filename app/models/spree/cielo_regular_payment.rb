@@ -6,6 +6,7 @@ module Spree
     delegate :order, :to => :payment
     
     def process!(payment)
+      payment.pend
       redirect_url = "#{Spree::Config[:site_url]}/cielo/orders/#{order.number}/payments/#{payment.id}/verify"
 
       cielo_regular_transaction = ::Cielo::Transaction::Regular.new(
@@ -36,12 +37,12 @@ module Spree
     end
     
     def actions
-      %w{capture void credit verify retry_capture}
+      %w{capture void credit verify}
     end
     
     # Indicates whether its possible to capture the payment
     def can_capture?(payment)
-      payment.state == 'pending'
+      payment.state == 'pending' && payment.source.status_sym == :authorized_pending_capture
     end
     
     def can_verify?(payment)
@@ -65,6 +66,10 @@ module Spree
       payment.log_entries.create(:details => response.to_yaml)
     end
     
+    def status_sym
+      Cielo::Transaction::Base::STATUSES.key(status)
+    end
+    
     def verify(payment)
       if tid.blank?
         payment.started_processing; payment.failure
@@ -72,18 +77,20 @@ module Spree
       end
       t = Cielo::Transaction::Base.new(:tid => tid)
       t.verify!
+      update_attribute :status, t.status
       record_log payment, t.body
       case Cielo::Transaction::Base::STATUSES.key(t.status)
         when :captured
           payment.complete
         when :in_progress
-          return
+          return true
         when :authorized_pending_capture
           payment.started_processing
           capture(payment)
         else
           payment.started_processing; payment.failure
       end
+      return true
     end
 
     def capture(payment)
@@ -93,9 +100,13 @@ module Spree
       end
       t = Cielo::Transaction::Base.new(:tid => tid)
       t.capture!
+      update_attribute :status, t.status
       record_log payment, t.body
       if t.captured?
         payment.complete
+        return true
+      else
+        return false
       end
     end
 
@@ -103,9 +114,10 @@ module Spree
       return nil if tid.blank?
       t = Cielo::Transaction::Base.new(:tid => tid)
       t.void!
+      update_attribute :status, t.status
       record_log payment, t.body
       if t.cancelled?
-        payment.void
+        payment.pend;payment.void
         true
       else
         false
