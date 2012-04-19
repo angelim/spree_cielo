@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency 'spree_core', '~> 1.0.0.rc1'
+  s.add_dependency 'spree_core', '~> 1.0.0'
   s.add_dependency 'activesupport'
   s.add_dependency 'active_attr'
   s.add_dependency 'builder'
