@@ -1,2 +1,3 @@
 - retry to capture in decaying time after the first attempt
 - tests
+- externalize supported cards through configuration

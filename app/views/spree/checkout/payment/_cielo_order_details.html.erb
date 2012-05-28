@@ -2,7 +2,7 @@
 	<% cc_type = @order.payments.last.source.cc_type.capitalize  %>
 	<br/>
   <% if @order.payment.completed? %>
-    Pagamento aprovado por <%= cc_type %>.
+    Transação autorizada por <%= cc_type %>.
   <% elsif @order.payment.processing? || @order.payment.pending? %>
 		Aguardando confirmação de pagamento por <%= cc_type %>. Esta ação pode levar alguns minutos.<br>
 		<%= link_to "Verificar novamente", 
@@ -10,7 +10,7 @@
 			:class => "btn btn-primary" 
 		%>
   <% else %>
-		Pagamento não identificado por <%= cc_type %>. 
+		Transação não autorizada por <%= cc_type %>. 
 		<%= link_to "Pagar com #{cc_type}", 
 			reauthenticate_cielo_path(:order_number => @order.number, :payment_id => @order.payments.last.id), 
 			:class => "btn btn-primary" 
