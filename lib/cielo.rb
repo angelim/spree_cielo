@@ -9,7 +9,7 @@ require "rexml/document"
 module Cielo
 
   class Production
-    BASE_URL = "ecommerce.cbmp.com.br"
+    BASE_URL = "ecommerce.cielo.com.br"
     WS_PATH = "/servicos/ecommwsec.do"
   end
 
