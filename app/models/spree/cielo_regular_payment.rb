@@ -75,7 +75,10 @@ module Spree
         payment.started_processing; payment.failure
         return
       end
-      t = Cielo::Transaction::Base.new(:tid => tid)
+      t = Cielo::Transaction::Base.new( tid: tid, 
+                                        dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
+                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso
+                                      )
       t.verify!
       update_attribute :status, t.status
       record_log payment, t.body
@@ -98,7 +101,10 @@ module Spree
         payment.started_processing; payment.failure
         return
       end
-      t = Cielo::Transaction::Base.new(:tid => tid)
+      t = Cielo::Transaction::Base.new( tid: tid, 
+                                        dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
+                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso
+                                      )
       t.capture!
       update_attribute :status, t.status
       record_log payment, t.body
@@ -112,7 +118,10 @@ module Spree
 
     def void(payment)
       return nil if tid.blank?
-      t = Cielo::Transaction::Base.new(:tid => tid)
+      t = Cielo::Transaction::Base.new( tid: tid, 
+                                        dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
+                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso
+                                      )
       t.void!
       update_attribute :status, t.status
       record_log payment, t.body
