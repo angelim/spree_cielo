@@ -77,7 +77,8 @@ module Spree
       end
       t = Cielo::Transaction::Base.new( tid: tid, 
                                         dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
-                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso
+                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso,
+                                        cielo_environment: payment.payment_method.preferred_cielo_environment
                                       )
       t.verify!
       update_attribute :status, t.status
@@ -103,7 +104,8 @@ module Spree
       end
       t = Cielo::Transaction::Base.new( tid: tid, 
                                         dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
-                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso
+                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso,
+                                        cielo_environment: payment.payment_method.preferred_cielo_environment
                                       )
       t.capture!
       update_attribute :status, t.status
@@ -120,7 +122,8 @@ module Spree
       return nil if tid.blank?
       t = Cielo::Transaction::Base.new( tid: tid, 
                                         dados_ec_numero: payment.payment_method.preferred_numero_afiliacao,
-                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso
+                                        dados_ec_chave: payment.payment_method.preferred_chave_acesso,
+                                        cielo_environment: payment.payment_method.preferred_cielo_environment
                                       )
       t.void!
       update_attribute :status, t.status
