@@ -5,8 +5,8 @@ module Spree
     has_one :payment, :as => :source
     delegate :order, :to => :payment
     
+    attr_accessible :order_id, :cc_type, :instalments
     def process!(payment)
-      payment.pend
       redirect_url = "#{Spree::Config[:site_url]}/cielo/orders/#{order.number}/payments/#{payment.id}/verify"
 
       cielo_regular_transaction = ::Cielo::Transaction::Regular.new(
@@ -18,7 +18,7 @@ module Spree
         dados_pedido_valor: order.total,
         forma_pagamento_bandeira: cc_type,
         forma_pagamento_produto: product_type,
-        forma_pagamento_parcelas: instalments,
+        forma_pagamento_parcelas: instalments
       )
       if cielo_regular_transaction.save!
         self.tid = cielo_regular_transaction.tid
@@ -28,12 +28,12 @@ module Spree
         if cielo_regular_transaction.errors.empty?
           self.save
         else
-          raise Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
+          return ActiveMerchant::Billing::Response.new(false, cielo_regular_transaction.errors.full_messages, {}, {})
         end
       else
-        record_log payment, cielo_regular_transaction.errors
-        raise Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
+          return ActiveMerchant::Billing::Response.new(false, cielo_regular_transaction.errors.full_messages, {}, {})
       end
+      ActiveMerchant::Billing::Response.new(true, "", {}, {})
     end
     
     def actions
@@ -63,7 +63,9 @@ module Spree
     end
 
     def record_log(payment, response)
-      payment.log_entries.create(:details => response.to_yaml)
+      log_entry = payment.log_entries.create
+      log_entry.details = response.to_yaml
+      log_entry.save
     end
     
     def status_sym
