@@ -24,6 +24,10 @@ module Spree
         self.tid = cielo_regular_transaction.tid
         self.authentication_url = cielo_regular_transaction.authentication_url
         self.status = cielo_regular_transaction.status
+        if order.respond_to? :instalments
+          order.instalments = instalments
+          order.save
+        end
         record_log payment, cielo_regular_transaction.body
         if cielo_regular_transaction.errors.empty?
           self.save
