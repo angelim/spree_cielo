@@ -21,10 +21,16 @@ class Spree::CieloController < Spree::BaseController
       if payment.reload.completed?
         redirect_to order_path(payment.order), :notice => t(:order_processed_successfully)
       else
+        handle_unconfirmed_payment
         redirect_to order_path(payment.order), :alert => t(:payment_not_identified)
       end
     else
       redirect_to root_path, :alert => t(:order_not_found)
     end
   end
+
+  private
+    # Trigger to handle unconfirmed status from cielo.
+    # Can be used to schedule another verification in a few minutes.
+    def handle_unconfirmed_payment;end;
 end
