@@ -70,7 +70,7 @@ module Cielo
       # Other request parameters
       attribute :parcelado_por, type: String, default: lambda{ Cielo.parcelado_por }
       attribute :autorizar, type: Integer, default: 3
-      attribute :capturar, type: String, default: "false"
+      attribute :capturar, type: String, default: "true"
       attribute :cielo_environment, type: String, default: "Test"
       validates :status, :inclusion => {:in => STATUSES.values, :allow_blank => true}
       validates :cielo_environment, :inclusion => {:in => %w(Test Production)}
@@ -101,14 +101,6 @@ module Cielo
 
       def attributes_hash(attr_names)
         attr_names.inject({}){|acc, name| acc[format_name(name)] = send(name); acc }
-      end
-      
-      def forma_pagamento_produto
-        if forma_pagamento_parcelas > 1
-          parcelado_por == "loja" ? 2 : 3
-        else
-          1
-        end
       end
       
       def save!

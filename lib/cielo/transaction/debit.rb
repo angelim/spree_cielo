@@ -1,5 +1,5 @@
 module Cielo
-  class Transaction::Regular < Cielo::Transaction::Base
+  class Transaction::Debit < Cielo::Transaction::Base
     AUTORIZACOES = [0,1,2,3]
     
     attribute :url_retorno, type: String, default: lambda { Cielo.return_path }
@@ -12,12 +12,9 @@ module Cielo
     def root_attributes
       %w(url_retorno autorizar capturar campo_livre bin)
     end
+
     def forma_pagamento_produto
-      if forma_pagamento_parcelas > 1
-        parcelado_por == "loja" ? 2 : 3
-      else
-        1
-      end
+      "A"
     end
   end
 end

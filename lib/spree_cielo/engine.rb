@@ -6,6 +6,7 @@ module SpreeCielo
 
     initializer "spree.register.cielo_regular_payment_method", after: "spree.register.payment_methods" do |app|
       app.config.spree.payment_methods << Spree::PaymentMethod::CieloRegularMethod
+      app.config.spree.payment_methods << Spree::PaymentMethod::CieloDebitMethod
     end
     
     def self.activate

@@ -1,4 +1,12 @@
-<% if @order.payment_method.instance_of? Spree::PaymentMethod::CieloRegularMethod %>
+<%  
+cielo_product = case @order.payment_method.class.name
+  when "Spree::PaymentMethod::CieloRegularMethod" then "crédito"
+  when "Spree::PaymentMethod::CieloDebitMethod" then "débito"
+  else ""
+end
+%>
+
+<% if @order.payment_method.class == Spree::PaymentMethod::CieloRegularMethod || @order.payment_method.class ==Spree::PaymentMethod::CieloDebitMethod %>
 	<% cc_type = @order.payments.last.source.cc_type.capitalize  %>
 	<br/>
   <% if @order.payment.completed? %>
@@ -11,7 +19,7 @@
 		%>
   <% else %>
 		Transação não autorizada por <%= cc_type %>. 
-		<%= link_to "Pagar com #{cc_type}", 
+		<%= link_to "Pagar com #{cielo_product} #{cc_type}", 
 			reauthenticate_cielo_path(:order_number => @order.number, :payment_id => @order.payments.last.id), 
 			:class => "btn btn-primary" 
 		%>

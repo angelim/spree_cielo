@@ -1,6 +1,6 @@
 Spree::CheckoutController.class_eval do
   unless Rails.application.config.consider_all_requests_local
-    rescue_from ::Cielo::PaymentError, :with => :handle_cielo_error
+    # rescue_from ::Cielo::PaymentError, :with => :handle_cielo_error
   end
 
   private

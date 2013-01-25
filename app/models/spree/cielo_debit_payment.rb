@@ -1,13 +1,12 @@
 module Spree
-  class CieloRegularPayment < ActiveRecord::Base
+  class CieloDebitPayment < ActiveRecord::Base
     include CieloBasePayment
     def authorize_code
-      3
+      1
     end
 
     def transaction_class
-      ::Cielo::Transaction::Regular
+      ::Cielo::Transaction::Debit
     end
   end
 end
-

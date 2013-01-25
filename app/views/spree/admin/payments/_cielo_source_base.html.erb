@@ -1,0 +1,35 @@
+<fieldset data-hook="creditcard">
+  <legend>Cielo</legend>
+
+  <table class="index">
+    <tr>
+    <th>Código de Transação da Cielo:</th>
+    <th>Data de criação do pagamento:</th>
+    <th>URL para efetuar o pagamento</th>
+    <th>Parcelas</th>
+    <th>Bandeira</th>
+    <th>Status</th>
+    </tr>
+    <tr>
+      <td><%= payment.source.tid %></td>
+      <td><%= l payment.source.created_at %></td>
+      <td><%= payment.source.authentication_url %></td>
+      <td><%= payment.source.instalments %></td>
+      <td><%= payment.source.cc_type %></td>
+      <td><%= cielo_status payment.source.status %></td>
+    </tr>
+  </table>
+  <table class="log">
+    <tr>
+    <th width="15%">Data:</th>
+    <th>Detalhes:</th>
+    </tr>
+    <% payment.log_entries.each do |log| %>
+      <tr>
+        <td><%= log.created_at %></td>
+        <td><%= yaml log.details %></td>
+      </tr>
+    <% end %>
+  </table>
+</fieldset>
+
