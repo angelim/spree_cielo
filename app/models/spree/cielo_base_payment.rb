@@ -35,11 +35,11 @@ module Spree
         if cielo_regular_transaction.errors.empty?
           self.save
         else
-          raise cielo_regular_transaction.errors.full_messages.inspect #Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
+          raise Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
         end
       else
         record_log payment, cielo_regular_transaction.errors
-        raise cielo_regular_transaction.errors.full_messages.inspect #Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
+        raise Cielo::PaymentError.new(cielo_regular_transaction.errors.full_messages)
       end
     end
     
