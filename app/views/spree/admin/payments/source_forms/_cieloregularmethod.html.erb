@@ -4,7 +4,7 @@
 	<div class="span3">
 		<%= label_tag "Bandeira *" %>
 		<%= select_tag "#{param_prefix}[cc_type]", options_for_select(Cielo::Transaction::Base::BANDEIRAS.map{|b|[b.capitalize, b]}) %>
-		<% (1..3).each do |instalment| %>
+		<% (1..payment_method.preferred_maximo_parcelas).each do |instalment| %>
 			<p>
 				<%= radio_button_tag "#{param_prefix}[instalments]", instalment, instalment==1 %>
 				<%= "#{instalment}x de #{number_to_currency(@order.total/instalment.to_f)}" %>
