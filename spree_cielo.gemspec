@@ -2,13 +2,13 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_cielo'
-  s.version     = '0.1.1'
+  s.version     = '0.2.2'
   s.summary     = 'Integração do SpreeCommerce com a Administradora de Cartões Cielo'
   s.description = ''
   s.required_ruby_version = '>= 1.9.3'
   s.author            = 'Alexandre Angelim'
   s.email             = 'angelim@angelim.com.br'
-  s.homepage          = 'http://github.com/angelim/spree_ciel'
+  s.homepage          = 'http://github.com/angelim/spree_cielo'
 
   s.files        = Dir['CHANGELOG', 'README.md', 'LICENSE', 'lib/**/*', 'app/**/*', 'config/**/*', 'db/**/*', 'spec/**/*']
   s.require_path = 'lib'

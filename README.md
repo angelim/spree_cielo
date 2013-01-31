@@ -1,6 +1,15 @@
-# Spree Pagseguro
+# Spree Cielo
 
-Uma extensão do [Spree](http://spreecommerce.com) para permitir pagamentos utilizando a Cielo.
+Uma estensão do [Spree](http://spreecommerce.com) para permitir pagamentos utilizando a Cielo.
+
+## Atenção
+
+Esta gem não foi desenvolvida pensando na utilização genérica. Foi um esforço empregado para um projeto específico e atrelada à uma versão
+específica do Spree (1.0-stable). É um reaproveitamento de outras gems do gênero(pagseguro), que não tem nenhum teste na própria gem. Todos
+os testes estão na aplicação-alvo. Use esse código como referência ao invés de aplicá-lo diretamente em seu projeto.
+
+Não há implementação completa do método de comunicação direto da Cielo(captura do cartão de crédito na loja). O fluxo regular é de
+criação de chamada via API e redirecionamento para a URL fornecida pela Cielo.
 
 ## Instalação
 
@@ -14,7 +23,7 @@ Rode a task de instalação:
 	
 ## Configuração
 	
-Após feita a instalação e migração, acesse a administração do spree, vá em Configuração -> Métodos de Pagamento e adicione um novo método selecionando `Spree::Gateway::Cielo`.
+Após feita a instalação e migração, acesse a administração do spree, vá em Configuração -> Métodos de Pagamento e adicione um novo método selecionando `Spree::PaymentMethod::CieloRegularMethod` ou `Spree::PaymentMethod::CieloDebitMethod`.
 
 ## Adaptação
 
