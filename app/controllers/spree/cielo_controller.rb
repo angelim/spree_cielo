@@ -19,6 +19,7 @@ class Spree::CieloController < Spree::BaseController
     if payment
       payment.source.verify payment
       if payment.reload.completed?
+        flash[:commerce_tracking] = "true"
         redirect_to order_path(payment.order), :notice => t(:order_processed_successfully)
       else
         handle_unconfirmed_payment
