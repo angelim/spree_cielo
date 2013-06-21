@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_cielo'
-  s.version     = '1.0.1'
+  s.version     = '1.0.2'
   s.summary     = 'Integração do SpreeCommerce com a Administradora de Cartões Cielo'
   s.description = ''
   s.required_ruby_version = '>= 1.9.3'

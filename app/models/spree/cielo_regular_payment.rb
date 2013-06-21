@@ -1,6 +1,7 @@
 module Spree
   class CieloRegularPayment < ActiveRecord::Base
     include CieloBasePayment
+    attr_accessible :order_id, :cc_type, :instalments
     def authorize_code
       3
     end
